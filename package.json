@@ -7,6 +7,11 @@
   "engines": {
     "node": "^22.19.0 || >=24.0.0"
   },
+  "dsh": {
+    "bundle": {
+      "patch": "./packages/bundle/cordis.patch.yml"
+    }
+  },
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc -b",

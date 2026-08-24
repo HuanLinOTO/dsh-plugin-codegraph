@@ -2,6 +2,8 @@
 
 [English](README.md) | 中文
 
+[![dshfind](https://dshfind.com/api/badge/CC19990113/dsh-plugin-codegraph?lang=zh)](https://dshfind.com/zh/plugins/CC19990113/dsh-plugin-codegraph?ref=badge)
+
 给 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)(`dsh`)加上结构化代码检索能力。
 
 装上之后,agent 多出两个工具:`codegraph` 和 `codegraph_index`。它能直接问"这个函数在哪定义的""谁调用了它""改了它会影响哪些地方""从 A 怎么走到 B",答案来自预先建好的符号索引,检索方法上比grep更快 消耗更小。
