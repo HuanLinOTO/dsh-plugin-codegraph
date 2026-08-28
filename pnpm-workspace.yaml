@@ -1,6 +1,7 @@
 packages:
   - 'packages/*'
+autoInstallPeers: false
 allowBuilds:
-  koffi: true
+  koffi: set this to true or false
 onlyBuiltDependencies:
   - koffi

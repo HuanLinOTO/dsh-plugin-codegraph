@@ -8,7 +8,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import Loader from '@deepseek-ai/cordis-plugin-loader'
 import Include from '@deepseek-ai/cordis-plugin-include'
-import { CallId } from '@deepseek-ai/dsh-llm'
+import { ToolCallId } from '@deepseek-ai/dsh-llm'
 import { SESSION_FORMAT_VERSION, Session, SessionId } from '@deepseek-ai/dsh-session'
 import AgentRegistry, { Inbox } from '@deepseek-ai/dsh-agent'
 import type { Agent } from '@deepseek-ai/dsh-agent'
@@ -138,7 +138,7 @@ async function boot(projectRoot: string, toolConfigLines: readonly string[] = []
 async function call(ctx: Context, owner: Agent, args: Record<string, unknown>, id = 'call') {
   return ctx.tools.execute({
     signal: new AbortController().signal,
-    callId: CallId(id),
+    callId: ToolCallId(id),
     name: 'codegraph',
     arguments: args,
     agent: owner,
@@ -309,7 +309,7 @@ describe('codegraph_index real Loader composition through cordis.yml', () => {
 
     const indexResult = await ctx.tools.execute({
       signal: new AbortController().signal,
-      callId: CallId('index'),
+      callId: ToolCallId('index'),
       name: 'codegraph_index',
       arguments: {},
       agent: owner,

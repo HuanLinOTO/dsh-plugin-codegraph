@@ -10,7 +10,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import Loader from '@deepseek-ai/cordis-plugin-loader'
 import Include from '@deepseek-ai/cordis-plugin-include'
-import { CallId } from '@deepseek-ai/dsh-llm'
+import { ToolCallId } from '@deepseek-ai/dsh-llm'
 import { SESSION_FORMAT_VERSION, Session, SessionId } from '@deepseek-ai/dsh-session'
 import AgentRegistry, { Inbox } from '@deepseek-ai/dsh-agent'
 import type { Agent } from '@deepseek-ai/dsh-agent'
@@ -112,7 +112,7 @@ describe.skipIf(!present)('tool-codegraph against a live external index', () => 
     for (const [index, args] of calls.entries()) {
       const result = await ctx.tools.execute({
         signal: new AbortController().signal,
-        callId: CallId(`live-${index}`),
+        callId: ToolCallId(`live-${index}`),
         name: 'codegraph',
         arguments: args,
         agent: owner,
