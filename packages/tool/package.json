@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-codegraph-tool",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Model-facing codegraph tools for DeepSeek Harness — a read-only codegraph tool with ten structural query operations plus a codegraph_index tool that builds or refreshes the index on its own timeout budget",
   "keywords": [
     "dsh",
@@ -58,16 +58,18 @@
     "@deepseek-ai/dsh-llm": ">=0.1.0-rc.6",
     "@deepseek-ai/dsh-system-prompt": ">=0.1.0-rc.6",
     "@deepseek-ai/dsh-timeout": ">=0.1.0-rc.6",
-    "@deepseek-ai/dsh-tools": ">=0.1.0-rc.6"
+    "@deepseek-ai/dsh-tools": ">=0.1.0-rc.6",
+    "@deepseek-ai/dsh-util-values": ">=0.1.2-alpha.2"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-fs": "0.1.0-rc.6",
-    "@deepseek-ai/dsh-invariants": "0.1.0-rc.6",
-    "@deepseek-ai/dsh-llm": "0.1.0-rc.6",
-    "@deepseek-ai/dsh-system-prompt": "0.1.0-rc.6",
-    "@deepseek-ai/dsh-timeout": "0.1.0-rc.6",
-    "@deepseek-ai/dsh-tools": "0.1.0-rc.6",
+    "@deepseek-ai/dsh-fs": "0.1.2-alpha.2",
+    "@deepseek-ai/dsh-invariants": "0.1.2-alpha.2",
+    "@deepseek-ai/dsh-llm": "0.1.2-alpha.2",
+    "@deepseek-ai/dsh-system-prompt": "0.1.2-alpha.2",
+    "@deepseek-ai/dsh-timeout": "0.1.2-alpha.2",
+    "@deepseek-ai/dsh-tools": "0.1.2-alpha.2",
+    "@deepseek-ai/dsh-util-values": "0.1.2-alpha.2",
     "dsh-plugin-codegraph-sqlite": "workspace:^",
     "dsh-plugin-codegraph-tree-sitter": "workspace:^"
   }

@@ -7,7 +7,7 @@
  * @module dsh-plugin-codegraph-tool/render
  */
 
-import { assertNever } from '@deepseek-ai/dsh-llm'
+import { assertNever } from '@deepseek-ai/dsh-util-values'
 import type { CodegraphToolValue } from './schema.ts'
 
 /** A symbol as one scannable line. */

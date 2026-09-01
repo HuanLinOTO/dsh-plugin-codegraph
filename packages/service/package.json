@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-codegraph-service",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Service Definition for the DeepSeek Harness code-graph capability seam (ctx.codegraph): a graph-store and graph-indexer provider registry with per-query, order-independent selection over eight normalized structural queries",
   "keywords": [
     "dsh",
@@ -53,8 +53,8 @@
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-brand": "0.1.0-rc.6",
-    "@deepseek-ai/dsh-invariants": "0.1.0-rc.6",
-    "@deepseek-ai/dsh-llm": "0.1.0-rc.6"
+    "@deepseek-ai/dsh-brand": "0.1.2-alpha.2",
+    "@deepseek-ai/dsh-invariants": "0.1.2-alpha.2",
+    "@deepseek-ai/dsh-llm": "0.1.2-alpha.2"
   }
 }
