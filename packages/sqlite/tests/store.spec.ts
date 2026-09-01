@@ -73,6 +73,20 @@ describe('graph database', () => {
     )
   })
 
+  it('serves a schema-v8 database the codegraph CLI wrote', async () => {
+    // The CLI (≥1.5) stamps v8: same nodes/edges/files/fts shape the store reads, plus columns and
+    // tables (unresolved_refs reshaped, project_metadata, name_segment_vocab) no store query touches.
+    // The fixture's stand-in keeps the shared tables and stamps v8, which is exactly the surface the
+    // store's SQL reaches.
+    const root = await project({ ...SEED, formatVersion: 8 })
+    const db = openGraph(root)
+    const summary = status(db, root, 100)
+    expect(summary.formatVersion).toBe(8)
+    expect(search(db, { operation: 'search', ...AT(root), query: 'helper', limit: 5 }).nodes.length)
+      .toBeGreaterThan(0)
+    db.close()
+  })
+
   it('refuses a graph that records no version at all', async () => {
     const root = await project({})
     const db = new DatabaseSync(databasePath(root))

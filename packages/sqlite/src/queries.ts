@@ -30,7 +30,6 @@ import type {
   CodegraphTraceRequest,
   CodegraphTraceResult,
 } from 'dsh-plugin-codegraph-service'
-import { SUPPORTED_FORMAT_VERSION } from './database.ts'
 import type { ImpactWalk, TraceWalk } from './traverse.ts'
 import { toEdge, toFile, toNode } from './rows.ts'
 import type { NodeRow } from './rows.ts'
@@ -379,7 +378,10 @@ export function status(db: DatabaseSync, projectRoot: string, maxStalenessChecks
     nodeCount: scalar(db, 'SELECT count(*) AS c FROM nodes'),
     edgeCount: scalar(db, 'SELECT count(*) AS c FROM edges'),
     languages,
-    formatVersion: SUPPORTED_FORMAT_VERSION,
+    // The version actually recorded on disk, not the store's support ceiling: two writers stamp
+    // different supported versions (tree-sitter writes v4, the CLI writes v8), so echoing the
+    // database's own row is the honest answer.
+    formatVersion: scalar(db, 'SELECT MAX(version) AS version FROM schema_versions'),
     indexedAt: indexedAt === 0 ? null : indexedAt,
     staleFileCount,
     staleFileCountTruncated,

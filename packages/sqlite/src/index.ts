@@ -24,7 +24,7 @@ import type {
   CodegraphStoreProvider,
 } from 'dsh-plugin-codegraph-service'
 import type {} from 'dsh-plugin-codegraph-service'
-import { assertNever } from '@deepseek-ai/dsh-llm'
+import { assertNever } from '@deepseek-ai/dsh-util-values'
 import { GraphPool, databasePath } from './database.ts'
 import { files, impact, node, relations, search, status, trace } from './queries.ts'
 import { walkImpact, walkTrace } from './traverse.ts'
@@ -32,7 +32,7 @@ import { walkImpact, walkTrace } from './traverse.ts'
 export {
   DATABASE_RELATIVE_PATH,
   GraphPool,
-  SUPPORTED_FORMAT_VERSION,
+  SUPPORTED_FORMAT_VERSIONS,
   databasePath,
   openGraph,
 } from './database.ts'
