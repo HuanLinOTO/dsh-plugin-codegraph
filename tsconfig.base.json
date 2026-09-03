@@ -32,13 +32,9 @@
     // a second copy of a module singleton through built `lib/`.
     "paths": {
       "dsh-plugin-codegraph-service": ["./packages/service/src"],
-      "dsh-plugin-codegraph-service/invariant": ["./packages/service/src/invariant.ts"],
       "dsh-plugin-codegraph-sqlite": ["./packages/sqlite/src"],
-      "dsh-plugin-codegraph-sqlite/invariant": ["./packages/sqlite/src/invariant.ts"],
       "dsh-plugin-codegraph-tree-sitter": ["./packages/tree-sitter/src"],
-      "dsh-plugin-codegraph-tree-sitter/invariant": ["./packages/tree-sitter/src/invariant.ts"],
-      "dsh-plugin-codegraph-tool": ["./packages/tool/src"],
-      "dsh-plugin-codegraph-tool/invariant": ["./packages/tool/src/invariant.ts"]
+      "dsh-plugin-codegraph-tool": ["./packages/tool/src"]
     }
   }
 }

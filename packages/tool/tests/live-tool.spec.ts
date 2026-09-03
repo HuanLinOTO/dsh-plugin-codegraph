@@ -78,7 +78,7 @@ describe.skipIf(!present)('tool-codegraph against a live external index', () => 
 
     const scope = ctx.plugin(() => {})
     const id = SessionId('codegraph-live')
-    const session = Session.create(id, [], { version: SESSION_FORMAT_VERSION, id, createdAt: 0, cwd: WORKSPACE })
+    const session = Session.create(id, [], { version: SESSION_FORMAT_VERSION, id, createdAt: 0, cwd: WORKSPACE, isSeeded: false })
     const owner: Agent = {
       id,
       options: {},

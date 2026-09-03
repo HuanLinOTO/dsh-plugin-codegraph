@@ -459,7 +459,7 @@ describe('the tool plugin', () => {
   function agent(ctx: Context, cwd: string): Agent {
     const scope = ctx.plugin(() => {})
     const id = SessionId('codegraph-unit')
-    const session = Session.create(id, [], { version: SESSION_FORMAT_VERSION, id, createdAt: 0, cwd })
+    const session = Session.create(id, [], { version: SESSION_FORMAT_VERSION, id, createdAt: 0, cwd, isSeeded: false })
     const value: Agent = {
       id, options: {}, session,
       inbox: new Inbox(session, { inserted: () => {}, discarded: () => {}, claimed: () => {} }),
@@ -655,7 +655,7 @@ describe('status against a root no store claims', () => {
   function owner(ctx: Context, cwd: string): Agent {
     const scope = ctx.plugin(() => {})
     const id = SessionId('codegraph-unindexed')
-    const session = Session.create(id, [], { version: SESSION_FORMAT_VERSION, id, createdAt: 0, cwd })
+    const session = Session.create(id, [], { version: SESSION_FORMAT_VERSION, id, createdAt: 0, cwd, isSeeded: false })
     const value: Agent = {
       id, options: {}, session,
       inbox: new Inbox(session, { inserted: () => {}, discarded: () => {}, claimed: () => {} }),
@@ -736,7 +736,7 @@ describe('answers a store returns when nothing resolves', () => {
   function owner(ctx: Context, cwd: string): Agent {
     const scope = ctx.plugin(() => {})
     const id = SessionId('codegraph-empty')
-    const session = Session.create(id, [], { version: SESSION_FORMAT_VERSION, id, createdAt: 0, cwd })
+    const session = Session.create(id, [], { version: SESSION_FORMAT_VERSION, id, createdAt: 0, cwd, isSeeded: false })
     const value: Agent = {
       id, options: {}, session,
       inbox: new Inbox(session, { inserted: () => {}, discarded: () => {}, claimed: () => {} }),
@@ -828,7 +828,7 @@ describe('the last shapes a trace answer can take', () => {
     await ctx.plugin(ToolCodegraph)
     const scope = ctx.plugin(() => {})
     const id = SessionId('codegraph-no-origin')
-    const session = Session.create(id, [], { version: SESSION_FORMAT_VERSION, id, createdAt: 0, cwd: root })
+    const session = Session.create(id, [], { version: SESSION_FORMAT_VERSION, id, createdAt: 0, cwd: root, isSeeded: false })
     const value: Agent = {
       id, options: {}, session,
       inbox: new Inbox(session, { inserted: () => {}, discarded: () => {}, claimed: () => {} }),

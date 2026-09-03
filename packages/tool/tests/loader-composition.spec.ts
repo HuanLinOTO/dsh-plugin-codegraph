@@ -63,7 +63,7 @@ const SEED = {
 function agent(ctx: Context, cwd: string): Agent {
   const scope = ctx.plugin(() => {})
   const id = SessionId('codegraph-loader-agent')
-  const session = Session.create(id, [], { version: SESSION_FORMAT_VERSION, id, createdAt: 0, cwd })
+  const session = Session.create(id, [], { version: SESSION_FORMAT_VERSION, id, createdAt: 0, cwd, isSeeded: false })
   const value: Agent = {
     id,
     options: {},

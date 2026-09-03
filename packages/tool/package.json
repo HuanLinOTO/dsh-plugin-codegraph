@@ -33,10 +33,6 @@
       "types": "./lib/index.d.ts",
       "default": "./lib/index.js"
     },
-    "./invariant": {
-      "types": "./lib/invariant.d.ts",
-      "default": "./lib/invariant.js"
-    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -53,23 +49,21 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": ">=4.0.1",
-    "@deepseek-ai/dsh-fs": ">=0.1.0-rc.6",
-    "@deepseek-ai/dsh-invariants": ">=0.1.0-rc.6",
-    "@deepseek-ai/dsh-llm": ">=0.1.0-rc.6",
-    "@deepseek-ai/dsh-system-prompt": ">=0.1.0-rc.6",
+    "@deepseek-ai/dsh-fs": ">=0.1.2-rc.1",
+    "@deepseek-ai/dsh-llm": ">=0.1.2-rc.1",
+    "@deepseek-ai/dsh-system-prompt": ">=0.1.2-rc.1",
     "@deepseek-ai/dsh-timeout": ">=0.1.0-rc.6",
-    "@deepseek-ai/dsh-tools": ">=0.1.0-rc.6",
-    "@deepseek-ai/dsh-util-values": ">=0.1.2-alpha.2"
+    "@deepseek-ai/dsh-tools": ">=0.1.2-rc.1",
+    "@deepseek-ai/dsh-util-values": ">=0.1.2-rc.1"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-fs": "0.1.2-alpha.2",
-    "@deepseek-ai/dsh-invariants": "0.1.2-alpha.2",
-    "@deepseek-ai/dsh-llm": "0.1.2-alpha.2",
-    "@deepseek-ai/dsh-system-prompt": "0.1.2-alpha.2",
-    "@deepseek-ai/dsh-timeout": "0.1.2-alpha.2",
-    "@deepseek-ai/dsh-tools": "0.1.2-alpha.2",
-    "@deepseek-ai/dsh-util-values": "0.1.2-alpha.2",
+    "@deepseek-ai/dsh-fs": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-llm": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-system-prompt": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-timeout": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-tools": "0.1.2-rc.1",
+    "@deepseek-ai/dsh-util-values": "0.1.2-rc.1",
     "dsh-plugin-codegraph-sqlite": "workspace:^",
     "dsh-plugin-codegraph-tree-sitter": "workspace:^"
   }
