@@ -1,7 +1,7 @@
 import { DatabaseSync } from 'node:sqlite'
 import { describe, expect, it, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
-import Codegraph, { CodegraphError } from 'dsh-plugin-codegraph-service'
+import Codegraph, { CodegraphError } from '@huanlin/dsh-plugin-codegraph-service'
 import * as CodegraphTreeSitter from '../src/index.ts'
 import { DATABASE_RELATIVE_PATH, DEFAULT_INDEXER_ID } from '../src/index.ts'
 import { writeProject } from './fixture.ts'
@@ -63,7 +63,7 @@ describe('codegraph-tree-sitter plugin', () => {
     expect(report.nodeCount).toBeGreaterThan(0)
     expect(report.edgeCount).toBeGreaterThan(0)
 
-    const CodegraphSqlite = await import('dsh-plugin-codegraph-sqlite')
+    const CodegraphSqlite = await import('@huanlin/dsh-plugin-codegraph-sqlite')
     await ctx.plugin(CodegraphSqlite)
     await expect(ctx.codegraph.available(root)).resolves.toBe(true)
     const status = await ctx.codegraph.query({ operation: 'status', projectRoot: root })
@@ -88,7 +88,7 @@ describe('codegraph-tree-sitter plugin', () => {
     const root = await writeProject({ 'a.ts': 'export function first() {}\n' })
     const ctx = await seam()
     await ctx.codegraph.index(root)
-    const CodegraphSqlite = await import('dsh-plugin-codegraph-sqlite')
+    const CodegraphSqlite = await import('@huanlin/dsh-plugin-codegraph-sqlite')
     await ctx.plugin(CodegraphSqlite)
     // Open (and cache) a store connection against the first graph before anything changes on disk.
     const before = await ctx.codegraph.query({ operation: 'search', projectRoot: root, query: 'first', limit: 10 })
@@ -106,7 +106,7 @@ describe('codegraph-tree-sitter plugin', () => {
   })
 
   it('exposes the on-disk path this package writes, matching the store\'s own constant', async () => {
-    const { DATABASE_RELATIVE_PATH: storePath } = await import('dsh-plugin-codegraph-sqlite')
+    const { DATABASE_RELATIVE_PATH: storePath } = await import('@huanlin/dsh-plugin-codegraph-sqlite')
     expect(DATABASE_RELATIVE_PATH).toBe(storePath)
   })
 

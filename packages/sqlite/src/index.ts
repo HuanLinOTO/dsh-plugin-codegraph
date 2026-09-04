@@ -11,19 +11,19 @@
  *
  * Namespace plugin (named exports, no default export). Lifecycle is effect-scoped: disposal
  * unregisters from `ctx.codegraph` first, then closes every open connection.
- * @module dsh-plugin-codegraph-sqlite
+ * @module @huanlin/dsh-plugin-codegraph-sqlite
  */
 
 import { access } from 'node:fs/promises'
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
-import { CodegraphStoreId } from 'dsh-plugin-codegraph-service'
+import { CodegraphStoreId } from '@huanlin/dsh-plugin-codegraph-service'
 import type {
   CodegraphRequest,
   CodegraphResultFor,
   CodegraphStoreProvider,
-} from 'dsh-plugin-codegraph-service'
-import type {} from 'dsh-plugin-codegraph-service'
+} from '@huanlin/dsh-plugin-codegraph-service'
+import type {} from '@huanlin/dsh-plugin-codegraph-service'
 import { assertNever } from '@deepseek-ai/dsh-util-values'
 import { GraphPool, databasePath } from './database.ts'
 import { files, impact, node, relations, search, status, trace } from './queries.ts'

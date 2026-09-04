@@ -6,13 +6,13 @@
  * Databases open READ-ONLY. The external indexer may be writing through its own daemon while the
  * harness reads, so this store never takes a write lock, never recovers a journal, and never repairs
  * an index it does not own.
- * @module dsh-plugin-codegraph-sqlite/database
+ * @module @huanlin/dsh-plugin-codegraph-sqlite/database
  */
 
 import { DatabaseSync } from 'node:sqlite'
 import { statSync } from 'node:fs'
 import { join } from 'node:path'
-import { CodegraphError } from 'dsh-plugin-codegraph-service'
+import { CodegraphError } from '@huanlin/dsh-plugin-codegraph-service'
 
 /**
  * Where the external indexer keeps a project's graph, relative to the project root. Fixed by that
@@ -26,7 +26,7 @@ export const DATABASE_RELATIVE_PATH = '.codegraph/codegraph.db'
  * is a fixed fact rather than a deployment choice; a database at any other version fails loud
  * instead of being read through assumptions that no longer hold.
  *
- * Two writers share this file, one per version: `dsh-plugin-codegraph-tree-sitter` builds schema v4,
+ * Two writers share this file, one per version: `@huanlin/dsh-plugin-codegraph-tree-sitter` builds schema v4,
  * and the `@colbymchenry/codegraph` CLI (≥1.5, whose daemon may own the same index) stamps schema
  * v8 — its `nodes`/`edges`/`files`/`nodes_fts` tables keep every column the store reads and only add
  * ones the store never touches (`unresolved_refs` is reshaped, `project_metadata` and

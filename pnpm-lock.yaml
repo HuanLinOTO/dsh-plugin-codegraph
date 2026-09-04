@@ -41,16 +41,16 @@ importers:
 
   packages/bundle:
     dependencies:
-      dsh-plugin-codegraph-service:
+      '@huanlin/dsh-plugin-codegraph-service':
         specifier: workspace:^
         version: link:../service
-      dsh-plugin-codegraph-sqlite:
+      '@huanlin/dsh-plugin-codegraph-sqlite':
         specifier: workspace:^
         version: link:../sqlite
-      dsh-plugin-codegraph-tool:
+      '@huanlin/dsh-plugin-codegraph-tool':
         specifier: workspace:^
         version: link:../tool
-      dsh-plugin-codegraph-tree-sitter:
+      '@huanlin/dsh-plugin-codegraph-tree-sitter':
         specifier: workspace:^
         version: link:../tree-sitter
 
@@ -71,7 +71,7 @@ importers:
       '@deepseek-ai/schemastery':
         specifier: ^3.18.1
         version: 3.18.1
-      dsh-plugin-codegraph-service:
+      '@huanlin/dsh-plugin-codegraph-service':
         specifier: workspace:^
         version: link:../service
     devDependencies:
@@ -90,7 +90,7 @@ importers:
       '@deepseek-ai/schemastery':
         specifier: ^3.18.1
         version: 3.18.1
-      dsh-plugin-codegraph-service:
+      '@huanlin/dsh-plugin-codegraph-service':
         specifier: workspace:^
         version: link:../service
     devDependencies:
@@ -115,10 +115,10 @@ importers:
       '@deepseek-ai/dsh-util-values':
         specifier: 0.1.2-rc.1
         version: 0.1.2-rc.1(@deepseek-ai/cordis@4.0.1)
-      dsh-plugin-codegraph-sqlite:
+      '@huanlin/dsh-plugin-codegraph-sqlite':
         specifier: workspace:^
         version: link:../sqlite
-      dsh-plugin-codegraph-tree-sitter:
+      '@huanlin/dsh-plugin-codegraph-tree-sitter':
         specifier: workspace:^
         version: link:../tree-sitter
 
@@ -127,7 +127,7 @@ importers:
       '@deepseek-ai/schemastery':
         specifier: ^3.18.1
         version: 3.18.1
-      dsh-plugin-codegraph-service:
+      '@huanlin/dsh-plugin-codegraph-service':
         specifier: workspace:^
         version: link:../service
       tree-sitter-wasms:

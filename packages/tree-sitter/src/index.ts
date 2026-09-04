@@ -1,7 +1,7 @@
 /**
  * Self-built code-graph indexer for `ctx.codegraph`. Parses a workspace with `web-tree-sitter` and
  * `tree-sitter-wasms` and writes schema version 4 to `<projectRoot>/.codegraph/codegraph.db` — the
- * same path and format `dsh-plugin-codegraph-sqlite` reads and the external `codegraph` CLI
+ * same path and format `@huanlin/dsh-plugin-codegraph-sqlite` reads and the external `codegraph` CLI
  * writes, so a workspace this package indexes becomes queryable through the existing store with no
  * second graph format to disagree with the first.
  *
@@ -13,15 +13,15 @@
  * Namespace plugin (named exports, no default export). Grammars load lazily, one per language, on
  * first sight of a matching file, and stay cached for the process — never eagerly for every grammar
  * this package ships with.
- * @module dsh-plugin-codegraph-tree-sitter
+ * @module @huanlin/dsh-plugin-codegraph-tree-sitter
  */
 
 import { stat } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
-import { CodegraphIndexerId } from 'dsh-plugin-codegraph-service'
-import type { CodegraphIndexer, CodegraphIndexReport } from 'dsh-plugin-codegraph-service'
+import { CodegraphIndexerId } from '@huanlin/dsh-plugin-codegraph-service'
+import type { CodegraphIndexer, CodegraphIndexReport } from '@huanlin/dsh-plugin-codegraph-service'
 import { LANGUAGE_TABLE } from './languages.ts'
 import { walkAndExtract } from './walk.ts'
 import { resolveWorkspace } from './resolve.ts'

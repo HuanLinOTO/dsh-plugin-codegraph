@@ -1,5 +1,5 @@
 {
-  "name": "dsh-plugin-codegraph-sqlite",
+  "name": "@huanlin/dsh-plugin-codegraph-sqlite",
   "version": "0.1.8",
   "description": "Read-only SQLite store for the DeepSeek Harness code-graph seam — serves structural queries from the schema-v4 graph at .codegraph/codegraph.db, the same on-disk format the codegraph CLI writes",
   "keywords": [
@@ -18,11 +18,11 @@
   "author": "CC ZHAO",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CC19990113/dsh-plugin-codegraph.git",
+    "url": "git+https://github.com/HuanLinOTO/dsh-plugin-codegraph.git",
     "directory": "packages/sqlite"
   },
-  "homepage": "https://github.com/CC19990113/dsh-plugin-codegraph#readme",
-  "bugs": "https://github.com/CC19990113/dsh-plugin-codegraph/issues",
+  "homepage": "https://github.com/HuanLinOTO/dsh-plugin-codegraph#readme",
+  "bugs": "https://github.com/HuanLinOTO/dsh-plugin-codegraph/issues",
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -38,12 +38,11 @@
     "lib/**/*.d.ts"
   ],
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "dependencies": {
     "@deepseek-ai/schemastery": "^3.18.1",
-    "dsh-plugin-codegraph-service": "workspace:^"
+    "@huanlin/dsh-plugin-codegraph-service": "workspace:^"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": ">=4.0.1",

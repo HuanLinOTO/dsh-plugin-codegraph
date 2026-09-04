@@ -2,13 +2,13 @@
  * The eight seam operations against one open graph database. Every function here is synchronous:
  * `node:sqlite` is a synchronous binding, so a query either completes within one turn or throws,
  * and the store's async surface exists for the seam's contract rather than for I/O interleaving.
- * @module dsh-plugin-codegraph-sqlite/queries
+ * @module @huanlin/dsh-plugin-codegraph-sqlite/queries
  */
 
 import { statSync } from 'node:fs'
 import { join } from 'node:path'
 import type { DatabaseSync } from 'node:sqlite'
-import { CodegraphError } from 'dsh-plugin-codegraph-service'
+import { CodegraphError } from '@huanlin/dsh-plugin-codegraph-service'
 import type {
   CodegraphCalleesRequest,
   CodegraphCallersRequest,
@@ -29,7 +29,7 @@ import type {
   CodegraphTraceHop,
   CodegraphTraceRequest,
   CodegraphTraceResult,
-} from 'dsh-plugin-codegraph-service'
+} from '@huanlin/dsh-plugin-codegraph-service'
 import type { ImpactWalk, TraceWalk } from './traverse.ts'
 import { toEdge, toFile, toNode } from './rows.ts'
 import type { NodeRow } from './rows.ts'

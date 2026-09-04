@@ -16,7 +16,7 @@
  * never called from {@link CodegraphService.query}: indexing is a caller-initiated, potentially
  * multi-minute operation, and `query` stays read-only so a store never hides a build behind a call the
  * model expects to return quickly.
- * @module dsh-plugin-codegraph-service
+ * @module @huanlin/dsh-plugin-codegraph-service
  */
 
 import { Context, Service } from '@deepseek-ai/cordis'

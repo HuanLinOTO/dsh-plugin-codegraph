@@ -1,5 +1,5 @@
 /**
- * Schema-v4 database writer: create the on-disk tables `dsh-plugin-codegraph-sqlite` reads —
+ * Schema-v4 database writer: create the on-disk tables `@huanlin/dsh-plugin-codegraph-sqlite` reads —
  * verbatim in structure, so the store and the external `codegraph` CLI stay able to open what this
  * package writes — and insert one indexing run's resolved graph.
  *
@@ -8,7 +8,7 @@
  * reader opening `databasePath` at any point either sees the complete previous graph or the complete
  * new one — never a window where the file exists with a fresh, empty schema and no rows yet, which a
  * naive "delete then recreate" leaves open between `CREATE TABLE` and the first `COMMIT`.
- * @module dsh-plugin-codegraph-tree-sitter/schema
+ * @module @huanlin/dsh-plugin-codegraph-tree-sitter/schema
  */
 
 import { mkdir, rename, rm } from 'node:fs/promises'

@@ -10,7 +10,7 @@
  * an independently versioned indexer: a record whose kind this build does not know must still reach
  * the model as data, not fail the query. `NODE_KINDS`, `EDGE_KINDS`, and `LANGUAGES` document the
  * values that format defines today.
- * @module dsh-plugin-codegraph-service/types
+ * @module @huanlin/dsh-plugin-codegraph-service/types
  */
 
 import type { CodegraphIndexerId, CodegraphNodeId, CodegraphStoreId } from './brand.ts'

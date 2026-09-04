@@ -14,11 +14,11 @@ import AgentRegistry, { Inbox } from '@deepseek-ai/dsh-agent'
 import type { Agent } from '@deepseek-ai/dsh-agent'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
-import Codegraph from 'dsh-plugin-codegraph-service'
+import Codegraph from '@huanlin/dsh-plugin-codegraph-service'
 import * as FsLocal from '@deepseek-ai/dsh-fs-local'
-import * as CodegraphSqlite from 'dsh-plugin-codegraph-sqlite'
-import * as CodegraphTreeSitter from 'dsh-plugin-codegraph-tree-sitter'
-import * as ToolCodegraph from 'dsh-plugin-codegraph-tool'
+import * as CodegraphSqlite from '@huanlin/dsh-plugin-codegraph-sqlite'
+import * as CodegraphTreeSitter from '@huanlin/dsh-plugin-codegraph-tree-sitter'
+import * as ToolCodegraph from '@huanlin/dsh-plugin-codegraph-tool'
 import { seedProject } from '../../sqlite/tests/fixture.ts'
 import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -102,9 +102,9 @@ async function boot(projectRoot: string, toolConfigLines: readonly string[] = []
     "- name: '@deepseek-ai/dsh-fs-local'",
     '  config:',
     `    cwd: ${JSON.stringify(projectRoot)}`,
-    "- name: 'dsh-plugin-codegraph-service'",
-    "- name: 'dsh-plugin-codegraph-sqlite'",
-    "- name: 'dsh-plugin-codegraph-tool'",
+    "- name: '@huanlin/dsh-plugin-codegraph-service'",
+    "- name: '@huanlin/dsh-plugin-codegraph-sqlite'",
+    "- name: '@huanlin/dsh-plugin-codegraph-tool'",
     ...toolConfigLines.length > 0 ? ['  config:', ...toolConfigLines] : [],
     '',
   ].join('\n'))
@@ -119,9 +119,9 @@ async function boot(projectRoot: string, toolConfigLines: readonly string[] = []
     ['@deepseek-ai/dsh-system-prompt', SystemPrompt],
     ['@deepseek-ai/dsh-tools', ToolRuntime],
     ['@deepseek-ai/dsh-fs-local', FsLocal],
-    ['dsh-plugin-codegraph-service', Codegraph],
-    ['dsh-plugin-codegraph-sqlite', CodegraphSqlite],
-    ['dsh-plugin-codegraph-tool', ToolCodegraph],
+    ['@huanlin/dsh-plugin-codegraph-service', Codegraph],
+    ['@huanlin/dsh-plugin-codegraph-sqlite', CodegraphSqlite],
+    ['@huanlin/dsh-plugin-codegraph-tool', ToolCodegraph],
   ])
   ctx.loader.internal = {
     version: 'v2',
@@ -252,12 +252,12 @@ async function bootWithIndexer(projectRoot: string): Promise<Context> {
     "- name: '@deepseek-ai/dsh-fs-local'",
     '  config:',
     `    cwd: ${JSON.stringify(projectRoot)}`,
-    "- name: 'dsh-plugin-codegraph-service'",
-    "- name: 'dsh-plugin-codegraph-sqlite'",
-    "- name: 'dsh-plugin-codegraph-tree-sitter'",
+    "- name: '@huanlin/dsh-plugin-codegraph-service'",
+    "- name: '@huanlin/dsh-plugin-codegraph-sqlite'",
+    "- name: '@huanlin/dsh-plugin-codegraph-tree-sitter'",
     '  config:',
     '    watch: false', // this test exercises Loader composition, not live watching
-    "- name: 'dsh-plugin-codegraph-tool'",
+    "- name: '@huanlin/dsh-plugin-codegraph-tool'",
     '',
   ].join('\n'))
 
@@ -271,10 +271,10 @@ async function bootWithIndexer(projectRoot: string): Promise<Context> {
     ['@deepseek-ai/dsh-system-prompt', SystemPrompt],
     ['@deepseek-ai/dsh-tools', ToolRuntime],
     ['@deepseek-ai/dsh-fs-local', FsLocal],
-    ['dsh-plugin-codegraph-service', Codegraph],
-    ['dsh-plugin-codegraph-sqlite', CodegraphSqlite],
-    ['dsh-plugin-codegraph-tree-sitter', CodegraphTreeSitter],
-    ['dsh-plugin-codegraph-tool', ToolCodegraph],
+    ['@huanlin/dsh-plugin-codegraph-service', Codegraph],
+    ['@huanlin/dsh-plugin-codegraph-sqlite', CodegraphSqlite],
+    ['@huanlin/dsh-plugin-codegraph-tree-sitter', CodegraphTreeSitter],
+    ['@huanlin/dsh-plugin-codegraph-tool', ToolCodegraph],
   ])
   ctx.loader.internal = {
     version: 'v2',
