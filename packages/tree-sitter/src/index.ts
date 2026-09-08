@@ -181,7 +181,15 @@ export function apply(ctx: Context, config: Config): void {
       respectGitignore: resolved.respectGitignore,
       debounceMs: resolved.watchDebounceMs,
       maxWatchedDirectories: resolved.maxWatchedDirectories,
-      sync: () => runSync(projectRoot, resolved),
+      sync: () => {
+        // The rebuild replaces the graph file by renaming the rebuilt one over it, and Windows
+        // refuses that rename while any reader in this process holds the old file open. A
+        // watcher-driven sync bypasses ctx.codegraph.index(), so it performs the same release the
+        // seam performs for a caller-initiated run — without it, one query plus the watcher's own
+        // rebuild retry limit is enough to degrade watching permanently.
+        ctx.codegraph.release(projectRoot)
+        return runSync(projectRoot, resolved)
+      },
       // No diagnostics service is wired into this package's dependencies; this is the floor for
       // "degradation must be visible" until one is, per NOTES.local.md.
       onDegraded: (reason) => {

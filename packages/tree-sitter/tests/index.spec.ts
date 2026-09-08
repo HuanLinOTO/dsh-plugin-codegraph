@@ -1,7 +1,7 @@
 import { DatabaseSync } from 'node:sqlite'
 import { describe, expect, it, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
-import Codegraph, { CodegraphError } from '@huanlin/dsh-plugin-codegraph-service'
+import Codegraph, { CodegraphError, CodegraphStoreId } from '@huanlin/dsh-plugin-codegraph-service'
 import * as CodegraphTreeSitter from '../src/index.ts'
 import { DATABASE_RELATIVE_PATH, DEFAULT_INDEXER_ID } from '../src/index.ts'
 import { writeProject } from './fixture.ts'
@@ -304,6 +304,46 @@ describe('codegraph-tree-sitter plugin', () => {
     await expect(ctx.codegraph.index(root)).resolves.toMatchObject({ filesIndexed: 1 })
     await ctx.fiber.dispose()
   })
+
+  it('releases the stores\' readers before a watcher-driven rebuild replaces the graph file', async () => {
+    const root = await writeProject({ 'a.ts': 'export function first() {}\n' })
+    const ctx = new Context()
+    await ctx.plugin(Codegraph)
+    const release = vi.fn()
+    ctx.codegraph.registerStore({
+      id: CodegraphStoreId('spy'),
+      indexes: () => Promise.resolve(false),
+      query: () => Promise.reject(new Error('not queried')),
+      release,
+    })
+    await ctx.plugin(CodegraphTreeSitter, { watch: true, watchDebounceMs: 100 })
+    // The baseline index() establishes the watcher too — see ensureWatching() — and a
+    // caller-initiated run releases through the seam before it runs.
+    await ctx.codegraph.index(root)
+    expect(release).toHaveBeenCalledWith(root)
+    release.mockClear()
+
+    try {
+      const { writeFile } = await import('node:fs/promises')
+      const deadline = Date.now() + 10_000
+      // Same re-issue workaround as the watcher tests above for the watch's startup window. With
+      // the mock cleared, the only call that can arrive now is the watcher-driven sync's own
+      // release — no other index() runs in this test.
+      let lastWriteAt = 0
+      while (release.mock.calls.length === 0 && Date.now() < deadline) {
+        if (Date.now() - lastWriteAt >= 1_000) {
+          await writeFile(`${root}/a.ts`, 'export function second() {}\n')
+          lastWriteAt = Date.now()
+        }
+        await new Promise(resolve => setTimeout(resolve, 50))
+      }
+      // Without this release the watcher's own rename would refuse EPERM while a pooled reader
+      // holds the file open, and the watcher's three-failure limit would degrade it permanently.
+      expect(release).toHaveBeenCalledWith(root)
+    } finally {
+      await ctx.fiber.dispose()
+    }
+  }, 15_000)
 
   it('CODEGRAPH_NO_WATCH=1 keeps watching off even when the config asks for it', async () => {
     const root = await writeProject({ 'a.ts': 'export function first() {}\n' })

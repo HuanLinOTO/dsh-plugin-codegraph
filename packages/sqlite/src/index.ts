@@ -121,6 +121,9 @@ export function apply(ctx: Context, config: Config): void {
     query<R extends CodegraphRequest>(request: R): Promise<CodegraphResultFor<R>> {
       return Promise.resolve(run(pool, resolved, request))
     },
+    release(projectRoot: string): void {
+      pool.release(projectRoot)
+    },
   }
 
   ctx.effect(function* () {
