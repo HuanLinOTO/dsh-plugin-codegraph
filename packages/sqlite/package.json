@@ -1,6 +1,6 @@
 {
   "name": "@huanlin/dsh-plugin-codegraph-sqlite",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Read-only SQLite store for the DeepSeek Harness code-graph seam — serves structural queries from the schema-v4 graph at .codegraph/codegraph.db, the same on-disk format the codegraph CLI writes",
   "keywords": [
     "dsh",
@@ -46,12 +46,12 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": ">=4.0.1",
-    "@deepseek-ai/dsh-llm": ">=0.1.2-rc.1",
-    "@deepseek-ai/dsh-util-values": ">=0.1.2-rc.1"
+    "@deepseek-ai/dsh-llm": ">=0.1.5-rc.1",
+    "@deepseek-ai/dsh-util-values": ">=0.1.5-rc.1"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-llm": "0.1.2-rc.1",
-    "@deepseek-ai/dsh-util-values": "0.1.2-rc.1"
+    "@deepseek-ai/dsh-llm": "0.1.5-rc.1",
+    "@deepseek-ai/dsh-util-values": "0.1.5-rc.1"
   }
 }

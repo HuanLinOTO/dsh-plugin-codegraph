@@ -12,14 +12,25 @@ import Loader from '@deepseek-ai/cordis-plugin-loader'
 import Include from '@deepseek-ai/cordis-plugin-include'
 import { ToolCallId } from '@deepseek-ai/dsh-llm'
 import { SESSION_FORMAT_VERSION, Session, SessionId } from '@deepseek-ai/dsh-session'
-import AgentRegistry, { Inbox } from '@deepseek-ai/dsh-agent'
-import type { Agent } from '@deepseek-ai/dsh-agent'
+import AgentRegistry from '@deepseek-ai/dsh-agent'
+import type { Agent, Inbox } from '@deepseek-ai/dsh-agent'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
 import Codegraph from '@huanlin/dsh-plugin-codegraph-service'
 import * as FsLocal from '@deepseek-ai/dsh-fs-local'
 import * as CodegraphSqlite from '@huanlin/dsh-plugin-codegraph-sqlite'
 import * as ToolCodegraph from '@huanlin/dsh-plugin-codegraph-tool'
+
+const stubInbox = (): Inbox => ({
+  nextTurn: [],
+  nextStep: [],
+  clear: () => {},
+  append: () => {},
+  prepend: () => {},
+  replace: () => false,
+  remove: () => false,
+  splice: () => [],
+})
 
 // Opt-in: point DSH_CODEGRAPH_LIVE_ROOT at a workspace the external codegraph CLI has indexed.
 const WORKSPACE = process.env['DSH_CODEGRAPH_LIVE_ROOT'] ?? ''
@@ -83,7 +94,7 @@ describe.skipIf(!present)('tool-codegraph against a live external index', () => 
       id,
       options: {},
       session,
-      inbox: new Inbox(session, { inserted: () => {}, discarded: () => {}, claimed: () => {} }),
+      inbox: stubInbox(),
       status: 'idle',
       ctx: scope.ctx,
       followup: () => {},

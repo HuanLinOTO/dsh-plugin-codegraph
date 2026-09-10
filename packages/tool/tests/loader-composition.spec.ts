@@ -10,8 +10,8 @@ import Loader from '@deepseek-ai/cordis-plugin-loader'
 import Include from '@deepseek-ai/cordis-plugin-include'
 import { ToolCallId } from '@deepseek-ai/dsh-llm'
 import { SESSION_FORMAT_VERSION, Session, SessionId } from '@deepseek-ai/dsh-session'
-import AgentRegistry, { Inbox } from '@deepseek-ai/dsh-agent'
-import type { Agent } from '@deepseek-ai/dsh-agent'
+import AgentRegistry from '@deepseek-ai/dsh-agent'
+import type { Agent, Inbox } from '@deepseek-ai/dsh-agent'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
 import Codegraph from '@huanlin/dsh-plugin-codegraph-service'
@@ -22,6 +22,17 @@ import * as ToolCodegraph from '@huanlin/dsh-plugin-codegraph-tool'
 import { seedProject } from '../../sqlite/tests/fixture.ts'
 import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
+
+const stubInbox = (): Inbox => ({
+  nextTurn: [],
+  nextStep: [],
+  clear: () => {},
+  append: () => {},
+  prepend: () => {},
+  replace: () => false,
+  remove: () => false,
+  splice: () => [],
+})
 
 let root: string | undefined
 let context: Context | undefined
@@ -68,7 +79,7 @@ function agent(ctx: Context, cwd: string): Agent {
     id,
     options: {},
     session,
-    inbox: new Inbox(session, { inserted: () => {}, discarded: () => {}, claimed: () => {} }),
+    inbox: stubInbox(),
     status: 'idle',
     ctx: scope.ctx,
     followup: () => {},

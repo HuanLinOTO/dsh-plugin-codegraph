@@ -5,8 +5,8 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import { ToolCallId } from '@deepseek-ai/dsh-llm'
 import { SESSION_FORMAT_VERSION, Session, SessionId } from '@deepseek-ai/dsh-session'
-import AgentRegistry, { Inbox } from '@deepseek-ai/dsh-agent'
-import type { Agent } from '@deepseek-ai/dsh-agent'
+import AgentRegistry from '@deepseek-ai/dsh-agent'
+import type { Agent, Inbox } from '@deepseek-ai/dsh-agent'
 import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
 import LocalFileSystem from '@deepseek-ai/dsh-fs-local'
@@ -60,6 +60,17 @@ function graphNode(overrides: Partial<CodegraphNode> = {}): CodegraphNode {
 }
 
 const LIMITS = { maxDocstringChars: 8, maxSignatureChars: 8 }
+
+const stubInbox = (): Inbox => ({
+  nextTurn: [],
+  nextStep: [],
+  clear: () => {},
+  append: () => {},
+  prepend: () => {},
+  replace: () => false,
+  remove: () => false,
+  splice: () => [],
+})
 
 describe('model-facing projection', () => {
   it('drops graph-only fields and renames positions for the model', () => {
@@ -462,7 +473,7 @@ describe('the tool plugin', () => {
     const session = Session.create(id, [], { version: SESSION_FORMAT_VERSION, id, createdAt: 0, cwd, isSeeded: false })
     const value: Agent = {
       id, options: {}, session,
-      inbox: new Inbox(session, { inserted: () => {}, discarded: () => {}, claimed: () => {} }),
+      inbox: stubInbox(),
       status: 'idle', ctx: scope.ctx,
       followup: () => {}, steer: () => {}, inject: () => {}, send: () => {}, cancel() {},
       runMaintenance: task => task(new AbortController().signal),
@@ -658,7 +669,7 @@ describe('status against a root no store claims', () => {
     const session = Session.create(id, [], { version: SESSION_FORMAT_VERSION, id, createdAt: 0, cwd, isSeeded: false })
     const value: Agent = {
       id, options: {}, session,
-      inbox: new Inbox(session, { inserted: () => {}, discarded: () => {}, claimed: () => {} }),
+      inbox: stubInbox(),
       status: 'idle', ctx: scope.ctx,
       followup: () => {}, steer: () => {}, inject: () => {}, send: () => {}, cancel() {},
       runMaintenance: task => task(new AbortController().signal),
@@ -739,7 +750,7 @@ describe('answers a store returns when nothing resolves', () => {
     const session = Session.create(id, [], { version: SESSION_FORMAT_VERSION, id, createdAt: 0, cwd, isSeeded: false })
     const value: Agent = {
       id, options: {}, session,
-      inbox: new Inbox(session, { inserted: () => {}, discarded: () => {}, claimed: () => {} }),
+      inbox: stubInbox(),
       status: 'idle', ctx: scope.ctx,
       followup: () => {}, steer: () => {}, inject: () => {}, send: () => {}, cancel() {},
       runMaintenance: task => task(new AbortController().signal),
@@ -831,7 +842,7 @@ describe('the last shapes a trace answer can take', () => {
     const session = Session.create(id, [], { version: SESSION_FORMAT_VERSION, id, createdAt: 0, cwd: root, isSeeded: false })
     const value: Agent = {
       id, options: {}, session,
-      inbox: new Inbox(session, { inserted: () => {}, discarded: () => {}, claimed: () => {} }),
+      inbox: stubInbox(),
       status: 'idle', ctx: scope.ctx,
       followup: () => {}, steer: () => {}, inject: () => {}, send: () => {}, cancel() {},
       runMaintenance: task => task(new AbortController().signal),
