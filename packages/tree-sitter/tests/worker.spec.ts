@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { Worker } from 'node:worker_threads'
+import type { MessagePort } from 'node:worker_threads'
 import { Context } from '@deepseek-ai/cordis'
 import Codegraph, { CodegraphError } from '@huanlin/dsh-plugin-codegraph-service'
 import * as CodegraphTreeSitter from '../src/index.ts'
@@ -9,7 +10,9 @@ import {
   nodeIndexWorkerFactory,
   runIndexingInProcess,
   runIndexingPass,
+  runWorkerPass,
   workerEntryUrl,
+  type WorkerErrorPayload,
   type WorkerFactory,
   type WorkerIndexOutput,
 } from '../src/worker.ts'
@@ -30,6 +33,23 @@ vi.mock('../src/walk.ts', async importOriginal => {
       if (walkStub.onWalk !== undefined) return { files: [], filesSkipped: 0 }
       return actual.walkAndExtract(...args)
     },
+  }
+})
+
+// The worker-main entry only runs its postMessage chain inside a real worker child, outside this
+// module graph and its coverage attribution — so the parent-side tests below stand in for a worker
+// with a fake parentPort (Worker stays the real one; the real-worker tests above spawn live threads).
+const workerMainStubs = vi.hoisted(() => ({
+  parentPort: null as MessagePort | null,
+  workerData: undefined as unknown,
+}))
+
+vi.mock('node:worker_threads', async importOriginal => {
+  const actual = await importOriginal<typeof import('node:worker_threads')>()
+  return {
+    ...actual,
+    get parentPort() { return workerMainStubs.parentPort },
+    get workerData() { return workerMainStubs.workerData },
   }
 })
 
@@ -258,8 +278,58 @@ describe('real worker threads', () => {
 
 /** The guard only runs when worker-main is evaluated outside a worker — which is exactly what this
  * test does, proving the entry fails loud rather than hanging as a module with no parent port. */
+describe('runWorkerPass', () => {
+  it('packages a real walk+resolve outcome for the parent', async () => {
+    const root = await writeProject({ 'a.ts': 'export function a() {}\n' })
+    const message = await runWorkerPass({ projectRoot: root, config: config() })
+    expect('workerError' in message).toBe(false)
+    const outcome = message as WorkerIndexOutput
+    expect(outcome.files.map(file => file.path)).toEqual(['a.ts'])
+    expect(outcome.graph.nodes.length).toBeGreaterThan(0)
+    expect(outcome.filesSkipped).toBe(0)
+    expect(outcome.indexedAt).toBeGreaterThan(0)
+  })
+
+  it('serializes a thrown Error through the workerError payload', async () => {
+    const message = await runWorkerPass({ projectRoot: 'D:/does/not/exist/codegraph-worker-pass', config: config() })
+    expect((message as { workerError?: WorkerErrorPayload }).workerError?.name).toBe('Error')
+    expect((message as { workerError?: WorkerErrorPayload }).workerError?.message).toContain('ENOENT')
+  })
+
+  it('serializes a thrown non-Error as an Error named Error with its string form', async () => {
+    walkStub.onWalk = () => { throw 'walk blew up' }
+    try {
+      const root = await writeProject({})
+      const message = await runWorkerPass({ projectRoot: root, config: config() })
+      expect(message).toMatchObject({ workerError: { name: 'Error', message: 'walk blew up' } })
+    } finally {
+      walkStub.onWalk = undefined
+    }
+  })
+})
+
 describe('worker-main entry', () => {
   it('refuses to run outside a worker_threads Worker', async () => {
+    workerMainStubs.parentPort = null
+    vi.resetModules()
     await expect(import('../src/worker-main.ts')).rejects.toThrow(/worker_threads/)
+  })
+
+  it('posts the pass outcome back to the parent port', async () => {
+    const root = await writeProject({ 'a.ts': 'export function a() {}\n' })
+    const postMessage = vi.fn()
+    workerMainStubs.parentPort = { postMessage } as unknown as MessagePort
+    workerMainStubs.workerData = { projectRoot: root, config: config() }
+    vi.resetModules()
+    try {
+      await import('../src/worker-main.ts')
+      await vi.waitFor(() => expect(postMessage).toHaveBeenCalledTimes(1))
+      const message = postMessage.mock.calls[0]?.[0] as WorkerIndexOutput
+      expect(message.files.map(file => file.path)).toEqual(['a.ts'])
+      expect(message.graph.nodes.length).toBeGreaterThan(0)
+    } finally {
+      workerMainStubs.parentPort = null
+      workerMainStubs.workerData = undefined
+    }
   })
 })

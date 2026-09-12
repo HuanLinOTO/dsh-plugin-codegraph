@@ -44,7 +44,7 @@ export type { ExtractedFile, GraphEdge, GraphNode, ResolvedGraph, UnresolvedRef 
 export { SCHEMA_VERSION, writeGraph } from './schema.ts'
 export { isExcluded, walkAndExtract } from './walk.ts'
 export type { WalkConfig, WalkResult } from './walk.ts'
-export { awaitWorkerResult, nodeIndexWorkerFactory, runIndexingInProcess, runIndexingPass, workerEntryUrl } from './worker.ts'
+export { awaitWorkerResult, nodeIndexWorkerFactory, runIndexingInProcess, runIndexingPass, runWorkerPass, workerEntryUrl } from './worker.ts'
 export type {
   IndexWorker,
   WorkerErrorPayload,

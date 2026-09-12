@@ -114,6 +114,11 @@ export const nodeIndexWorkerFactory: WorkerFactory = () => {
   }
 }
 
+/** The rejection used when a worker dies before posting anything — the crash-shaped case. */
+function workerExitError(code: number): Error {
+  return new Error(`codegraph index worker exited before returning a result (exit code ${code})`)
+}
+
 /** Rebuild a plain `Error` from the payload the worker serialized. */
 function rewrapWorkerError(payload: WorkerErrorPayload): Error {
   const error = new Error(payload.message)
@@ -121,9 +126,26 @@ function rewrapWorkerError(payload: WorkerErrorPayload): Error {
   return error
 }
 
-/** The rejection used when a worker dies before posting anything — the crash-shaped case. */
-function workerExitError(code: number): Error {
-  return new Error(`codegraph index worker exited before returning a result (exit code ${code})`)
+/**
+ * One pass as the worker runs it: walk, resolve, and package the message back to the parent —
+ * the outcome on success, a serialized `{ workerError }` on any failure (an `Error` does not
+ * survive `postMessage`; its name and message do). Exported so `worker-main.ts` stays a thin
+ * glue file and this logic stays testable in the parent's module graph.
+ */
+export async function runWorkerPass(input: WorkerIndexInput): Promise<WorkerResultMessage> {
+  try {
+    const { files, filesSkipped } = await walkAndExtract(input.projectRoot, input.config)
+    const indexedAt = Date.now()
+    const graph = resolveWorkspace(files, indexedAt)
+    return { files, filesSkipped, graph, indexedAt }
+  } catch (error) {
+    return {
+      workerError: {
+        name: error instanceof Error ? error.name : 'Error',
+        message: error instanceof Error ? error.message : String(error),
+      },
+    }
+  }
 }
 
 /**
