@@ -24,8 +24,9 @@ import { CodegraphError, CodegraphIndexerId } from '@huanlin/dsh-plugin-codegrap
 import type { CodegraphIndexer, CodegraphIndexReport } from '@huanlin/dsh-plugin-codegraph-service'
 import { LANGUAGE_TABLE } from './languages.ts'
 import { isWasmRuntimeCrash } from './grammar.ts'
-import { walkAndExtract } from './walk.ts'
-import { resolveWorkspace } from './resolve.ts'
+import type { WalkConfig } from './walk.ts'
+import { runIndexingInProcess, runIndexingPass, nodeIndexWorkerFactory } from './worker.ts'
+import type { WorkerFactory } from './worker.ts'
 import { writeGraph } from './schema.ts'
 import { createWatcher } from './watcher.ts'
 import type { Watcher } from './watcher.ts'
@@ -35,6 +36,7 @@ export { LANGUAGE_TABLE, languageFor } from './languages.ts'
 export type { DefinitionRule, ImportRule, LanguageSpec } from './languages.ts'
 export { extractFile } from './extract.ts'
 export type { FileExtraction, RawCall, RawDefinition, RawImport } from './extract.ts'
+export { isWasmRuntimeCrash } from './grammar.ts'
 export { loadGitignore, matchesGitignore, parseGitignore } from './gitignore.ts'
 export type { GitignoreRule } from './gitignore.ts'
 export { resolveWorkspace } from './resolve.ts'
@@ -42,6 +44,15 @@ export type { ExtractedFile, GraphEdge, GraphNode, ResolvedGraph, UnresolvedRef 
 export { SCHEMA_VERSION, writeGraph } from './schema.ts'
 export { isExcluded, walkAndExtract } from './walk.ts'
 export type { WalkConfig, WalkResult } from './walk.ts'
+export { awaitWorkerResult, nodeIndexWorkerFactory, runIndexingInProcess, runIndexingPass, workerEntryUrl } from './worker.ts'
+export type {
+  IndexWorker,
+  WorkerErrorPayload,
+  WorkerFactory,
+  WorkerIndexInput,
+  WorkerIndexOutput,
+  WorkerResultMessage,
+} from './worker.ts'
 export { createWatcher, nodeWatch } from './watcher.ts'
 export type { DegradeReason, WatchConfig, WatchHandle, WatchPrimitive, Watcher } from './watcher.ts'
 export { decideWatch, readProcVersion } from './watch-policy.ts'
@@ -112,6 +123,15 @@ export interface Config {
   /** Files parsed concurrently (default 4). */
   concurrency?: number
   /**
+   * Run each indexing pass inside a fresh `worker_threads` Worker so a tree-sitter WASM crash
+   * (poisoned grammar, heap exhaustion) wastes only that pass, with one retry on a new WASM heap,
+   * and never the harness process's shared Emscripten runtime (default true). Set false to walk,
+   * parse, and resolve in-process — the pre-worker behavior, where a crash poisons this process's
+   * parser runtime for good. A runtime that cannot construct workers at all falls back to in-process
+   * either way.
+   */
+  indexInWorker?: boolean
+  /**
    * Watch the workspace for file changes and refresh the index automatically after a successful
    * `index()` call establishes a baseline (default true). Set `watch: false` to keep indexing purely
    * explicit instead.
@@ -140,12 +160,13 @@ export const Config: z<Config> = z.object({
   maxFileBytes: z.number().default(DEFAULT_MAX_FILE_BYTES),
   maxFiles: z.number().default(DEFAULT_MAX_FILES),
   concurrency: z.number().default(DEFAULT_CONCURRENCY),
+  indexInWorker: z.boolean().default(true),
   watch: z.boolean().default(true),
   watchDebounceMs: z.number().default(DEFAULT_WATCH_DEBOUNCE_MS),
   maxWatchedDirectories: z.number().default(DEFAULT_MAX_WATCHED_DIRECTORIES),
 })
 
-type ResolvedConfig = Required<Config>
+export type ResolvedConfig = Required<Config>
 
 /**
  * Register the tree-sitter indexer.
@@ -250,50 +271,64 @@ async function runSync(projectRoot: string, config: ResolvedConfig): Promise<{ f
 /**
  * One indexing run: walk, parse, resolve, and write.
  *
- * Exported for tests (this package's convention for its seams). A tree-sitter WASM abort — heap
- * exhaustion or a grammar assertion, surfacing as `Aborted()` / `WebAssembly.RuntimeError` — leaves
- * the Emscripten module singleton behind `Parser.init()` permanently poisoned (`grammar.ts`), so
- * retrying in this process cannot help: the run fails as a `CODEGRAPH_INDEXER_CRASHED` whose message
- * names the one thing that does recover it — restarting the harness process — instead of the bare
- * `Aborted(). Build with -sASSERTIONS for more info.` the tool used to surface.
+ * Exported for tests (this package's convention for its seams). The walk+resolve phases run in a
+ * fresh worker thread by default (see {@link Config.indexInWorker}); a tree-sitter WASM abort —
+ * heap exhaustion or a grammar assertion, surfacing as `Aborted()` / `WebAssembly.RuntimeError` —
+ * then wastes only that pass, and the retry gets a new WASM heap. Whether it crashed in a worker or
+ * in-process, the run fails as a `CODEGRAPH_INDEXER_CRASHED` whose message names the one thing that
+ * does recover it — restarting the harness process — instead of the bare `Aborted(). Build with
+ * -sASSERTIONS for more info.` the tool used to surface: the Emscripten module singleton behind
+ * `Parser.init()` cannot be rebuilt, so retrying this process cannot help.
  * @param projectRoot - absolute path of the workspace to index.
  * @param config - the resolved plugin configuration.
- * @param signal - aborts the run.
+ * @param signal - aborts the run; terminates a running worker rather than waiting it out.
+ * @param factory - builds the pass's worker; injectable for tests.
  * @returns the run's report.
  */
-export async function runIndex(projectRoot: string, config: ResolvedConfig, signal?: AbortSignal): Promise<CodegraphIndexReport> {
+export async function runIndex(
+  projectRoot: string,
+  config: ResolvedConfig,
+  signal?: AbortSignal,
+  factory: WorkerFactory = nodeIndexWorkerFactory,
+): Promise<CodegraphIndexReport> {
+  signal?.throwIfAborted()
   try {
-    const { files, filesSkipped } = await walkAndExtract(projectRoot, {
+    const bounds: WalkConfig = {
       exclude: config.exclude,
       respectGitignore: config.respectGitignore,
       maxFileBytes: config.maxFileBytes,
       maxFiles: config.maxFiles,
       concurrency: config.concurrency,
       languages: config.languages,
-    }, signal)
-    signal?.throwIfAborted()
-
-    const indexedAt = Date.now()
-    const graph = resolveWorkspace(files, indexedAt)
+    }
+    const outcome = config.indexInWorker
+      ? await runIndexingPass(projectRoot, bounds, signal, factory)
+      : await runIndexingInProcess(projectRoot, bounds, signal)
     signal?.throwIfAborted()
 
     const databasePath = join(projectRoot, DATABASE_RELATIVE_PATH)
-    await writeGraph(databasePath, { files, nodes: graph.nodes, edges: graph.edges, unresolved: graph.unresolved, indexedAt })
+    await writeGraph(databasePath, {
+      files: outcome.files,
+      nodes: outcome.graph.nodes,
+      edges: outcome.graph.edges,
+      unresolved: outcome.graph.unresolved,
+      indexedAt: outcome.indexedAt,
+    })
 
     const languageCounts = new Map<string, number>()
-    for (const file of files) languageCounts.set(file.language, (languageCounts.get(file.language) ?? 0) + 1)
+    for (const file of outcome.files) languageCounts.set(file.language, (languageCounts.get(file.language) ?? 0) + 1)
     const languages = [...languageCounts.entries()]
       .map(([language, fileCount]) => ({ language, fileCount }))
       .sort((left, right) => right.fileCount - left.fileCount || left.language.localeCompare(right.language))
 
     return {
       projectRoot,
-      filesIndexed: files.length,
-      filesSkipped,
-      nodeCount: graph.nodes.length,
-      edgeCount: graph.edges.length,
-      unresolvedCount: graph.unresolved.length,
-      unresolvedLikelyInternalCount: graph.unresolved.filter(ref => !ref.likelyExternal).length,
+      filesIndexed: outcome.files.length,
+      filesSkipped: outcome.filesSkipped,
+      nodeCount: outcome.graph.nodes.length,
+      edgeCount: outcome.graph.edges.length,
+      unresolvedCount: outcome.graph.unresolved.length,
+      unresolvedLikelyInternalCount: outcome.graph.unresolved.filter(ref => !ref.likelyExternal).length,
       languages,
     }
   } catch (error) {

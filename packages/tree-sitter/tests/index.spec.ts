@@ -26,8 +26,9 @@ async function seam(config?: Record<string, unknown>): Promise<Context> {
   const ctx = new Context()
   await ctx.plugin(Codegraph)
   // Tests that don't care about watching stay on the old no-watch behavior; the watch-specific tests
-  // below override this back to `true` via their own explicit config.
-  await ctx.plugin(CodegraphTreeSitter, { watch: false, ...config })
+  // below override this back to `true` via their own explicit config. Same for worker isolation:
+  // in-process here (where the walk stub above applies), real workers in worker.spec.ts.
+  await ctx.plugin(CodegraphTreeSitter, { watch: false, indexInWorker: false, ...config })
   return ctx
 }
 
