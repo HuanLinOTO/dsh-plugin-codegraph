@@ -20,9 +20,10 @@ import { stat } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
-import { CodegraphIndexerId } from '@huanlin/dsh-plugin-codegraph-service'
+import { CodegraphError, CodegraphIndexerId } from '@huanlin/dsh-plugin-codegraph-service'
 import type { CodegraphIndexer, CodegraphIndexReport } from '@huanlin/dsh-plugin-codegraph-service'
 import { LANGUAGE_TABLE } from './languages.ts'
+import { isWasmRuntimeCrash } from './grammar.ts'
 import { walkAndExtract } from './walk.ts'
 import { resolveWorkspace } from './resolve.ts'
 import { writeGraph } from './schema.ts'
@@ -248,44 +249,63 @@ async function runSync(projectRoot: string, config: ResolvedConfig): Promise<{ f
 
 /**
  * One indexing run: walk, parse, resolve, and write.
+ *
+ * Exported for tests (this package's convention for its seams). A tree-sitter WASM abort — heap
+ * exhaustion or a grammar assertion, surfacing as `Aborted()` / `WebAssembly.RuntimeError` — leaves
+ * the Emscripten module singleton behind `Parser.init()` permanently poisoned (`grammar.ts`), so
+ * retrying in this process cannot help: the run fails as a `CODEGRAPH_INDEXER_CRASHED` whose message
+ * names the one thing that does recover it — restarting the harness process — instead of the bare
+ * `Aborted(). Build with -sASSERTIONS for more info.` the tool used to surface.
  * @param projectRoot - absolute path of the workspace to index.
  * @param config - the resolved plugin configuration.
  * @param signal - aborts the run.
  * @returns the run's report.
  */
-async function runIndex(projectRoot: string, config: ResolvedConfig, signal?: AbortSignal): Promise<CodegraphIndexReport> {
-  const { files, filesSkipped } = await walkAndExtract(projectRoot, {
-    exclude: config.exclude,
-    respectGitignore: config.respectGitignore,
-    maxFileBytes: config.maxFileBytes,
-    maxFiles: config.maxFiles,
-    concurrency: config.concurrency,
-    languages: config.languages,
-  }, signal)
-  signal?.throwIfAborted()
+export async function runIndex(projectRoot: string, config: ResolvedConfig, signal?: AbortSignal): Promise<CodegraphIndexReport> {
+  try {
+    const { files, filesSkipped } = await walkAndExtract(projectRoot, {
+      exclude: config.exclude,
+      respectGitignore: config.respectGitignore,
+      maxFileBytes: config.maxFileBytes,
+      maxFiles: config.maxFiles,
+      concurrency: config.concurrency,
+      languages: config.languages,
+    }, signal)
+    signal?.throwIfAborted()
 
-  const indexedAt = Date.now()
-  const graph = resolveWorkspace(files, indexedAt)
-  signal?.throwIfAborted()
+    const indexedAt = Date.now()
+    const graph = resolveWorkspace(files, indexedAt)
+    signal?.throwIfAborted()
 
-  const databasePath = join(projectRoot, DATABASE_RELATIVE_PATH)
-  await writeGraph(databasePath, { files, nodes: graph.nodes, edges: graph.edges, unresolved: graph.unresolved, indexedAt })
+    const databasePath = join(projectRoot, DATABASE_RELATIVE_PATH)
+    await writeGraph(databasePath, { files, nodes: graph.nodes, edges: graph.edges, unresolved: graph.unresolved, indexedAt })
 
-  const languageCounts = new Map<string, number>()
-  for (const file of files) languageCounts.set(file.language, (languageCounts.get(file.language) ?? 0) + 1)
-  const languages = [...languageCounts.entries()]
-    .map(([language, fileCount]) => ({ language, fileCount }))
-    .sort((left, right) => right.fileCount - left.fileCount || left.language.localeCompare(right.language))
+    const languageCounts = new Map<string, number>()
+    for (const file of files) languageCounts.set(file.language, (languageCounts.get(file.language) ?? 0) + 1)
+    const languages = [...languageCounts.entries()]
+      .map(([language, fileCount]) => ({ language, fileCount }))
+      .sort((left, right) => right.fileCount - left.fileCount || left.language.localeCompare(right.language))
 
-  return {
-    projectRoot,
-    filesIndexed: files.length,
-    filesSkipped,
-    nodeCount: graph.nodes.length,
-    edgeCount: graph.edges.length,
-    unresolvedCount: graph.unresolved.length,
-    unresolvedLikelyInternalCount: graph.unresolved.filter(ref => !ref.likelyExternal).length,
-    languages,
+    return {
+      projectRoot,
+      filesIndexed: files.length,
+      filesSkipped,
+      nodeCount: graph.nodes.length,
+      edgeCount: graph.edges.length,
+      unresolvedCount: graph.unresolved.length,
+      unresolvedLikelyInternalCount: graph.unresolved.filter(ref => !ref.likelyExternal).length,
+      languages,
+    }
+  } catch (error) {
+    if (isWasmRuntimeCrash(error)) {
+      throw new CodegraphError(
+        `the tree-sitter WASM runtime crashed while indexing "${projectRoot}"; indexing in this process ` +
+        'will keep failing until the harness process is restarted (then run codegraph_index again)',
+        'CODEGRAPH_INDEXER_CRASHED',
+        { cause: error },
+      )
+    }
+    throw error
   }
 }
 

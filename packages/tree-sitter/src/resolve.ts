@@ -255,11 +255,29 @@ export function resolveWorkspace(files: readonly ExtractedFile[], now: number): 
 
     const keyToId = new Map<string, string>()
     const fileNodes: GraphNode[] = []
+    /**
+     * One-based occurrence count per start position within this file. Two definitions that begin at
+     * the same line:column — a macro-instantiated class (`class PUGIXML_CLASS xml_writer_file …`)
+     * whose inner `class_specifier` captures the macro name at the same spot as the outer
+     * declaration, or `struct VST3Binary { … } VST3LoadBinary;` whose `declaration` and inner
+     * `struct_specifier` share position 32:0 — would otherwise mint the same node id and the write
+     * would die on the `nodes.id` primary key, voiding the whole run. The first keeps the bare
+     * `path:line:col` (every id this package has ever written), the k-th (k ≥ 2) appends `#k`; walk
+     * order makes the assignment deterministic across runs. Every consumer of a definition's id —
+     * `keyToId` lookups, `contains`/`calls`/heritage edges, `unresolved.source` — reads through that
+     * map, so the suffix stays consistent everywhere by construction.
+     */
+    const positionOccurrences = new Map<string, number>()
     for (const def of file.extraction.definitions) {
       const qualifiedName = def.container.length === 0
         ? `${file.path}::${def.name}`
         : `${file.path}::${[...def.container, def.name].join('.')}`
-      const nodeId = `${file.path}:${def.startLine}:${def.startColumn}`
+      const positionKey = `${def.startLine}:${def.startColumn}`
+      const occurrence = positionOccurrences.get(positionKey) ?? 0
+      positionOccurrences.set(positionKey, occurrence + 1)
+      const nodeId = occurrence === 0
+        ? `${file.path}:${def.startLine}:${def.startColumn}`
+        : `${file.path}:${def.startLine}:${def.startColumn}#${occurrence + 1}`
       keyToId.set(def.key, nodeId)
       fileNodes.push({
         id: nodeId,

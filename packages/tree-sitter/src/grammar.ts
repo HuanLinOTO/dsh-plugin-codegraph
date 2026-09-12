@@ -56,3 +56,19 @@ export async function createParser(spec: LanguageSpec): Promise<Parser> {
   parser.setLanguage(language)
   return parser
 }
+
+/**
+ * Whether a thrown value is web-tree-sitter's terminal WASM abort. When the shared Emscripten heap
+ * is exhausted or a grammar assertion trips, the C side calls `abort()`, which surfaces here as a
+ * `WebAssembly.RuntimeError` — or a plain `Error` whose message is `Aborted(). Build with
+ * -sASSERTIONS for more info.` — and the module singleton behind `Parser.init()` (`if (!Module3) …`,
+ * never rebuilt) is poisoned for the rest of the process: every later parse in this process fails
+ * the same way. Callers route on this to fail the run as a diagnosable `CODEGRAPH_INDEXER_CRASHED`
+ * instead of surfacing the bare abort, and to tell the caller what actually recovers it — restarting
+ * the harness process — rather than a retry, which cannot help in-process.
+ * @param error - the caught value.
+ */
+export function isWasmRuntimeCrash(error: unknown): boolean {
+  if (error instanceof WebAssembly.RuntimeError) return true
+  return error instanceof Error && /\bAborted\(\)/.test(error.message)
+}

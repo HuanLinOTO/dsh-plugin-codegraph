@@ -267,6 +267,29 @@ describe('resolveWorkspace', () => {
     expect(graph.edges).toContainEqual(expect.objectContaining({ source: 'a.ts:1:0', target: 'b.ts:1:0', kind: 'calls', line: 2, col: 2 }))
   })
 
+  it('disambiguates definitions sharing one start position instead of colliding on a single node id', () => {
+    // The two real C++ shapes that collide: a macro-instantiated class whose inner specifier captures
+    // the macro name at the outer declaration's own position, and `struct X { … } x;` where the
+    // declaration and the struct specifier share position 32:0. A third definition at the same spot
+    // locks the general k-th rule.
+    const files = [
+      file('f.cpp', [
+        def({ key: 'outer', name: 'xml_writer_file', kind: 'class', startLine: 330, endLine: 340, startColumn: 1 }),
+        def({ key: 'inner', name: 'VST3LoadBinary', kind: 'variable', parentKey: 'outer', container: ['xml_writer_file'], startLine: 330, endLine: 330, startColumn: 1 }),
+        def({ key: 'third', name: 'thirdAtSameSpot', kind: 'function', startLine: 330, endLine: 335, startColumn: 1 }),
+      ]),
+      file('caller.ts', [], [{ callerKey: null, calleeName: 'thirdAtSameSpot', line: 1, column: 0, isMemberCall: false }]),
+    ]
+    const graph = resolveWorkspace(files, NOW)
+    const ids = graph.nodes.filter(node => node.filePath === 'f.cpp' && node.kind !== 'file').map(node => node.id)
+    // The first keeps the bare `path:line:col` this package has always written; the k-th (k ≥ 2)
+    // appends `#k`, so the write can no longer die on the nodes.id primary key.
+    expect(ids).toEqual(['f.cpp:330:1', 'f.cpp:330:1#2', 'f.cpp:330:1#3'])
+    // Edges read ids back through the same key→id map, so they point at the disambiguated nodes.
+    expect(graph.edges).toContainEqual({ source: 'f.cpp:330:1', target: 'f.cpp:330:1#2', kind: 'contains', provenance: 'tree-sitter' })
+    expect(graph.edges).toContainEqual(expect.objectContaining({ source: 'file:caller.ts', target: 'f.cpp:330:1#3', kind: 'calls' }))
+  })
+
   describe('extends/implements resolution', () => {
     it('resolves rule 1: an extends target imported from a workspace file', () => {
       const files = [

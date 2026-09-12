@@ -12,6 +12,7 @@
 import { createHash } from 'node:crypto'
 import { readdir, readFile, stat } from 'node:fs/promises'
 import { posix } from 'node:path'
+import type { Tree } from 'web-tree-sitter'
 import { createParser } from './grammar.ts'
 import { extractFile } from './extract.ts'
 import { loadGitignore, matchesGitignore } from './gitignore.ts'
@@ -126,9 +127,10 @@ async function parseCandidate(candidate: Candidate, config: WalkConfig, signal?:
   if (spec === undefined) return undefined
   const text = await readFile(candidate.absolute, 'utf8')
   const parser = await createParser(spec)
+  let tree: Tree | null = null
   try {
     signal?.throwIfAborted()
-    const tree = parser.parse(text)
+    tree = parser.parse(text)
     /* v8 ignore next 2 -- createParser() always assigns a language before returning; parse() returns
      * null only when the parser has none. */
     if (tree === null) return undefined
@@ -143,7 +145,14 @@ async function parseCandidate(candidate: Candidate, config: WalkConfig, signal?:
       extraction,
     }
   } finally {
-    parser.delete()
+    // The tree's WASM-side memory is released here, not by the GC: web-tree-sitter registers no
+    // FinalizationRegistry, so a tree that reaches the end of parseCandidate() without delete()
+    // leaks its heap until the process dies — across a full workspace walk that is gigabytes, and
+    // the Emscripten heap backing every parser in this process tops out around 2GB.
+    /* v8 ignore next 1 -- the null tree is unreachable for a grammar-backed parser (see the guard
+     * above); the optional chain only keeps that impossible null from reaching delete(). */
+    try { tree?.delete() } catch { /* a WASM-side tree release failure must not mask the run's real error. */ }
+    try { parser.delete() } catch { /* same for the parser: release failure must not mask the run's real error. */ }
   }
 }
 

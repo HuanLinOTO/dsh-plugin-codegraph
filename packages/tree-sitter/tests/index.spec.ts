@@ -6,6 +6,22 @@ import * as CodegraphTreeSitter from '../src/index.ts'
 import { DATABASE_RELATIVE_PATH, DEFAULT_INDEXER_ID } from '../src/index.ts'
 import { writeProject } from './fixture.ts'
 
+// Indexing runs go through the real walk for every test below except the crash-wrapping ones, which
+// set this stub to make walkAndExtract throw a chosen error; the mock wrapper delegates to the real
+// implementation whenever the stub is clear.
+const walkStub = vi.hoisted(() => ({ error: undefined as (() => unknown) | undefined }))
+
+vi.mock('../src/walk.ts', async importOriginal => {
+  const actual = await importOriginal<typeof import('../src/walk.ts')>()
+  return {
+    ...actual,
+    async walkAndExtract(...args: Parameters<typeof actual.walkAndExtract>) {
+      if (walkStub.error !== undefined) throw walkStub.error()
+      return actual.walkAndExtract(...args)
+    },
+  }
+})
+
 async function seam(config?: Record<string, unknown>): Promise<Context> {
   const ctx = new Context()
   await ctx.plugin(Codegraph)
@@ -114,6 +130,53 @@ describe('codegraph-tree-sitter plugin', () => {
     const ctx = new Context()
     await ctx.plugin(Codegraph)
     await expect(ctx.plugin(CodegraphTreeSitter, { maxFiles: 0 })).rejects.toThrow(/maxFiles/)
+  })
+
+  describe('WASM runtime crash wrapping', () => {
+    /** Run one index() with walkAndExtract throwing `error`, returning the rejection for inspection. */
+    async function indexRejection(error: () => unknown, root: string): Promise<unknown> {
+      const ctx = await seam()
+      walkStub.error = error
+      try {
+        return await ctx.codegraph.index(root).then(
+          () => { throw new Error('expected the index to reject') },
+          (rejection: unknown) => rejection,
+        )
+      } finally {
+        walkStub.error = undefined
+        await ctx.fiber.dispose()
+      }
+    }
+
+    it('wraps a WebAssembly.RuntimeError abort in CODEGRAPH_INDEXER_CRASHED with restart guidance', async () => {
+      const root = await writeProject({ 'a.ts': 'export function a() {}\n' })
+      const error = await indexRejection(
+        () => new WebAssembly.RuntimeError('Aborted(). Build with -sASSERTIONS for more info.'),
+        root,
+      )
+      // Retrying in-process cannot help — the Emscripten module singleton behind Parser.init() is
+      // poisoned for good — so the message must say what does: restarting the harness process.
+      expect(error).toBeInstanceOf(CodegraphError)
+      expect((error as CodegraphError).code).toBe('CODEGRAPH_INDEXER_CRASHED')
+      expect((error as Error).message).toContain('restarted')
+      expect((error as { cause?: unknown }).cause).toBeInstanceOf(WebAssembly.RuntimeError)
+    })
+
+    it('recognizes the abort in its plain-Error shape too (web-tree-sitter throws both)', async () => {
+      const root = await writeProject({ 'a.ts': 'export function a() {}\n' })
+      const error = await indexRejection(() => new Error('Aborted(). Build with -sASSERTIONS for more info.'), root)
+      expect(error).toBeInstanceOf(CodegraphError)
+      expect((error as CodegraphError).code).toBe('CODEGRAPH_INDEXER_CRASHED')
+      expect((error as { cause?: unknown }).cause).toBeInstanceOf(Error)
+    })
+
+    it('passes any other walk failure through unwrapped, still retryable in-process', async () => {
+      const root = await writeProject({ 'a.ts': 'export function a() {}\n' })
+      const error = await indexRejection(() => new Error('ENOENT: no such file or directory'), root)
+      expect(error).toBeInstanceOf(Error)
+      expect(error).not.toBeInstanceOf(CodegraphError)
+      expect((error as Error).message).toBe('ENOENT: no such file or directory')
+    })
   })
 
   it('replaces a previous run\'s graph rather than merging with it', async () => {
