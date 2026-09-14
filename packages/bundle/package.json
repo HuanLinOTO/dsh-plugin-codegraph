@@ -29,6 +29,9 @@
   "homepage": "https://github.com/HuanLinOTO/dsh-plugin-codegraph#readme",
   "bugs": "https://github.com/HuanLinOTO/dsh-plugin-codegraph/issues",
   "type": "module",
+  "scripts": {
+    "prepack": "node ../../scripts/assert-pnpm-publish.mjs"
+  },
   "files": [
     "cordis.patch.yml"
   ],
