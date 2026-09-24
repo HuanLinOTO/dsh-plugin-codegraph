@@ -1,6 +1,6 @@
 {
   "name": "@huanlin/dsh-plugin-codegraph-service",
-  "version": "0.1.12",
+  "version": "0.2.0",
   "description": "Service Definition for the DeepSeek Harness code-graph capability seam (ctx.codegraph): a graph-store and graph-indexer provider registry with per-query, order-independent selection over eight normalized structural queries",
   "keywords": [
     "dsh",
@@ -31,11 +31,13 @@
       "types": "./lib/index.d.ts",
       "default": "./lib/index.js"
     },
+    "./locale/*.json": "./locale/*.json",
     "./package.json": "./package.json"
   },
   "files": [
     "lib/**/*.js",
-    "lib/**/*.d.ts"
+    "lib/**/*.d.ts",
+    "locale/"
   ],
   "publishConfig": {
     "access": "public"

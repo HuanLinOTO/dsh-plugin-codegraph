@@ -1,5 +1,7 @@
 {
-  // packages/bundle carries no TypeScript: it ships only cordis.patch.yml.
+  // packages/bundle ships no compiled output — only cordis.patch.yml and
+  // locale/. Its tests read package metadata and run under vitest alone,
+  // so the bundle needs no TypeScript project reference here.
   "files": [],
   "references": [
     { "path": "./packages/service" },

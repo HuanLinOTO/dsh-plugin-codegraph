@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Codegraph",
+    "description": "Structural code intelligence: the codegraph and codegraph_index tools answer where a symbol is declared, who calls it, what a change reaches, and how one symbol reaches another — from a tree-sitter index the plugin builds itself."
+  }
+}

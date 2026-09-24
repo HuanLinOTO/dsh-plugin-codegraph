@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Codegraph service definition",
+    "description": "Service Definition: publishes ctx.codegraph — the store and indexer provider registries plus the eight normalized graph queries. Carries no storage of its own."
+  }
+}

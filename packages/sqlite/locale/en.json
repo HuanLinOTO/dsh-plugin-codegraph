@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Codegraph store (SQLite)",
+    "description": "Service Provider (read): serves structural queries from the schema-v4 graph at .codegraph/codegraph.db. Claims a project root only when that file already exists."
+  }
+}

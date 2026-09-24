@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Codegraph 存储（SQLite）",
+    "description": "服务提供方（读）：从 .codegraph/codegraph.db 的 schema-v4 图应答结构查询；仅在该文件已存在时才认领项目根。"
+  }
+}

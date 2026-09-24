@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Codegraph indexer (tree-sitter)",
+    "description": "Service Provider (write): builds the same schema-v4 index file with web-tree-sitter, so no external indexer is needed. Registers only an indexer, never a store, keeping one claimant per project root."
+  }
+}

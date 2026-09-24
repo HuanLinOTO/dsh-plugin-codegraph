@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Codegraph tools",
+    "description": "Consumer: the model-facing codegraph tool (ten read-only structural queries) and codegraph_index (build or refresh the index), plus their system-prompt section."
+  }
+}

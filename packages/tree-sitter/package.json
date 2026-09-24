@@ -1,6 +1,6 @@
 {
   "name": "@huanlin/dsh-plugin-codegraph-tree-sitter",
-  "version": "0.1.13",
+  "version": "0.2.0",
   "description": "Self-built code-graph indexer for DeepSeek Harness — parses a workspace with web-tree-sitter and writes schema version 4 to .codegraph/codegraph.db, the same on-disk format the codegraph CLI writes, so no external indexer is required",
   "keywords": [
     "dsh",
@@ -33,11 +33,13 @@
       "types": "./lib/index.d.ts",
       "default": "./lib/index.js"
     },
+    "./locale/*.json": "./locale/*.json",
     "./package.json": "./package.json"
   },
   "files": [
     "lib/**/*.js",
-    "lib/**/*.d.ts"
+    "lib/**/*.d.ts",
+    "locale/"
   ],
   "publishConfig": {
     "access": "public"

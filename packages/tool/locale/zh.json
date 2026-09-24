@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Codegraph 工具",
+    "description": "消费端：模型可用的 codegraph 工具（十种只读结构查询）与 codegraph_index（构建或刷新索引），以及配套的 system-prompt 段落。"
+  }
+}

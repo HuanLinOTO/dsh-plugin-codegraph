@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Codegraph 索引器（tree-sitter）",
+    "description": "服务提供方（写）：用 web-tree-sitter 构建同一 schema-v4 的索引文件，无需外部索引器；只注册 indexer、不注册 store，守住每个项目根唯一认领者的规则。"
+  }
+}

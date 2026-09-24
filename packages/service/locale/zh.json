@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Codegraph 服务定义",
+    "description": "服务定义：发布 ctx.codegraph——store 与 indexer 提供方注册表，外加八个规范化图查询；自身不携带存储。"
+  }
+}

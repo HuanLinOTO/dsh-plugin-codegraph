@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "代码图谱",
+    "description": "结构化代码检索：codegraph 与 codegraph_index 两个工具回答符号在哪里声明、谁调用了它、改动会波及哪些地方、两个符号之间如何到达——答案来自插件自建的 tree-sitter 索引。"
+  }
+}

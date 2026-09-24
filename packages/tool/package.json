@@ -1,6 +1,6 @@
 {
   "name": "@huanlin/dsh-plugin-codegraph-tool",
-  "version": "0.1.12",
+  "version": "0.2.0",
   "description": "Model-facing codegraph tools for DeepSeek Harness — a read-only codegraph tool with ten structural query operations plus a codegraph_index tool that builds or refreshes the index on its own timeout budget",
   "keywords": [
     "dsh",
@@ -33,11 +33,13 @@
       "types": "./lib/index.d.ts",
       "default": "./lib/index.js"
     },
+    "./locale/*.json": "./locale/*.json",
     "./package.json": "./package.json"
   },
   "files": [
     "lib/**/*.js",
-    "lib/**/*.d.ts"
+    "lib/**/*.d.ts",
+    "locale/"
   ],
   "publishConfig": {
     "access": "public"
