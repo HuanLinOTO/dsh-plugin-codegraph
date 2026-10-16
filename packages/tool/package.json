@@ -1,6 +1,6 @@
 {
   "name": "@huanlin/dsh-plugin-codegraph-tool",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Model-facing codegraph tools for DeepSeek Harness — a read-only codegraph tool with ten structural query operations plus a codegraph_index tool that builds or refreshes the index on its own timeout budget",
   "keywords": [
     "dsh",
@@ -49,13 +49,13 @@
     "@huanlin/dsh-plugin-codegraph-service": "workspace:^"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-fs": "^0.2.0-rc.1",
-    "@deepseek-ai/dsh-llm": "^0.2.0-rc.1",
-    "@deepseek-ai/dsh-system-prompt": "^0.2.0-rc.1",
-    "@deepseek-ai/dsh-timeout": "^0.2.0-rc.1",
-    "@deepseek-ai/dsh-tools": "^0.2.0-rc.1",
-    "@deepseek-ai/dsh-util-values": "^0.2.0-rc.1"
+    "@deepseek-ai/cordis": "~4.0.5-alpha.2",
+    "@deepseek-ai/dsh-fs": "^0.2.1-alpha.5",
+    "@deepseek-ai/dsh-llm": "^0.2.1-alpha.5",
+    "@deepseek-ai/dsh-system-prompt": "^0.2.1-alpha.5",
+    "@deepseek-ai/dsh-timeout": "^0.2.1-alpha.5",
+    "@deepseek-ai/dsh-tools": "^0.2.1-alpha.5",
+    "@deepseek-ai/dsh-util-values": "^0.2.1-alpha.5"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",

@@ -15,7 +15,7 @@ dsh plugin --profile <name> add @huanlin/dsh-plugin-codegraph
 ```
 
 
-> **Fork 说明**：本仓库是 [CC19990113/dsh-plugin-codegraph](https://github.com/CC19990113/dsh-plugin-codegraph) 的活跃维护 fork（上游自 2026-08 的 v0.1.6 后停更），跟进 DSH `0.1.2-rc.1`，npm 包发布在 `@huanlin` scope 下。
+> **Fork 说明**：本仓库是 [CC19990113/dsh-plugin-codegraph](https://github.com/CC19990113/dsh-plugin-codegraph) 的活跃维护 fork（上游自 2026-08 的 v0.1.6 后停更），跟进 DSH `0.2.x` 线（已针对 `0.2.1-alpha.5` 验证），npm 包发布在 `@huanlin` scope 下。
 
 ## 解决什么问题
 

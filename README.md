@@ -15,7 +15,7 @@ dsh plugin --profile <name> add @huanlin/dsh-plugin-codegraph
 ```
 
 
-> **Fork notice:** This is the actively maintained fork of [CC19990113/dsh-plugin-codegraph](https://github.com/CC19990113/dsh-plugin-codegraph) (upstream inactive since v0.1.6, 2026-08). This fork tracks the DSH `0.1.2-rc.1` line and publishes under the `@huanlin` npm scope.
+> **Fork notice:** This is the actively maintained fork of [CC19990113/dsh-plugin-codegraph](https://github.com/CC19990113/dsh-plugin-codegraph) (upstream inactive since v0.1.6, 2026-08). This fork tracks the DSH `0.2.x` line (verified against `0.2.1-alpha.5`) and publishes under the `@huanlin` npm scope.
 
 ## Why
 
